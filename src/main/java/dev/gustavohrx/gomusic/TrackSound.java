@@ -11,7 +11,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.valueproviders.ConstantFloat;
 
 /**
- * Uma faixa tocada pelo sistema de som do jogo, na categoria Música, sem precisar de sounds.json.
+ * A track played by the game's sound system, in the Music category, without needing sounds.json.
  */
 final class TrackSound extends AbstractTickableSoundInstance {
 
@@ -33,7 +33,7 @@ final class TrackSound extends AbstractTickableSoundInstance {
 
     @Override
     public WeighedSoundEvents resolve(SoundManager manager) {
-        // stream = true: lê do disco aos poucos, em vez de carregar a música inteira na memória.
+        // stream = true: reads from disk gradually instead of loading the whole track into memory.
         this.sound = new Sound(location.toString(), ConstantFloat.of(1f), ConstantFloat.of(1f),
                 1, Sound.Type.FILE, true, false, 16);
         WeighedSoundEvents events = new WeighedSoundEvents(location, null);

@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * O que está acontecendo com o jogador agora. As condições das regras leem este objeto.
+ * What is happening to the player right now. Rule conditions read this object.
  */
 final class Situation {
 
@@ -77,7 +77,7 @@ final class Situation {
         lastBossTick = tickCount;
     }
 
-    /** Roda em todo tick: uma queda de vida entre dois ticks seguidos não pode passar despercebida. */
+    /** Runs every tick so a health drop between two ticks is never missed. */
     void tick(Minecraft mc) {
         tickCount++;
         LocalPlayer player = mc.player;
@@ -92,7 +92,7 @@ final class Situation {
         lastHealth = health;
     }
 
-    /** Recalcula tudo; é chamado cerca de uma vez por segundo. */
+    /** Recalculates everything; called about once per second. */
     void refresh(Minecraft mc) {
         flags.clear();
         biomeTags.clear();
@@ -202,7 +202,7 @@ final class Situation {
         }
     }
 
-    /** O cliente não recebe o ponto de renascimento, então "casa" é o último lugar onde o jogador dormiu. */
+    /** The client does not receive the spawn point, so "home" is the last place the player slept. */
     private void readHome(Minecraft mc, LocalPlayer player) {
         String world = worldKey(mc) + "|" + dimension;
         boolean sleeping = player.isSleeping();
@@ -223,7 +223,7 @@ final class Situation {
         if (mc.getSingleplayerServer() != null) {
             return "local:" + mc.getSingleplayerServer().getWorldData().getLevelName();
         }
-        return mc.getCurrentServer() != null ? "server:" + mc.getCurrentServer().ip : "desconhecido";
+        return mc.getCurrentServer() != null ? "server:" + mc.getCurrentServer().ip : "unknown";
     }
 
     private Map<String, double[]> loadedHomes() {
@@ -236,7 +236,7 @@ final class Situation {
                         homes.putAll(saved);
                     }
                 } catch (IOException | RuntimeException e) {
-                    GoMusic.LOGGER.warn("[GoMusic] Não foi possível ler {}", MusicFolder.HOMES, e);
+                    GoMusic.LOGGER.warn("[GoMusic] Could not read {}", MusicFolder.HOMES, e);
                 }
             }
         }
@@ -247,7 +247,7 @@ final class Situation {
         try {
             Files.writeString(MusicFolder.HOMES, GSON.toJson(homes, HOMES_TYPE), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            GoMusic.LOGGER.warn("[GoMusic] Não foi possível salvar {}", MusicFolder.HOMES, e);
+            GoMusic.LOGGER.warn("[GoMusic] Could not save {}", MusicFolder.HOMES, e);
         }
     }
 }

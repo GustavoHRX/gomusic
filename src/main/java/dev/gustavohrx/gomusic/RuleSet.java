@@ -12,11 +12,11 @@ import java.util.Locale;
 import java.util.function.Predicate;
 
 /**
- * O rules.json: a lista de regras, em ordem de prioridade.
+ * The rules.json file: the list of rules, in priority order.
  */
 final class RuleSet {
 
-    /** Formato do JSON. Os nomes dos campos são os nomes usados no arquivo. */
+    /** JSON format. Field names are the names used in the file. */
     private static final class Json {
         float fadeSeconds = 3f;
         float silenceSeconds = 20f;
@@ -48,7 +48,7 @@ final class RuleSet {
             this.holdTicks = holdTicks;
         }
 
-        /** Chamado uma vez a cada refresh; holdSeconds mantém a regra válida depois que as condições acabam. */
+        /** Called once per refresh; holdSeconds keeps the rule valid after its conditions end. */
         boolean update(Situation situation, int elapsedTicks) {
             if (conditions.stream().allMatch(condition -> condition.test(situation))) {
                 holdLeft = holdTicks;
@@ -77,18 +77,18 @@ final class RuleSet {
 
     static RuleSet load() {
         if (!Files.isRegularFile(MusicFolder.RULES)) {
-            GoMusic.LOGGER.info("[GoMusic] Sem {}: mod inativo, música do jogo mantida", MusicFolder.RULES);
+            GoMusic.LOGGER.info("[GoMusic] No {}: mod inactive, keeping the game's music", MusicFolder.RULES);
             return empty();
         }
         Json json;
         try (Reader reader = Files.newBufferedReader(MusicFolder.RULES, StandardCharsets.UTF_8)) {
             json = new Gson().fromJson(reader, Json.class);
         } catch (IOException | RuntimeException e) {
-            GoMusic.LOGGER.error("[GoMusic] rules.json inválido; mod inativo", e);
+            GoMusic.LOGGER.error("[GoMusic] Invalid rules.json; mod inactive", e);
             return empty();
         }
         if (json == null || json.rules == null) {
-            GoMusic.LOGGER.error("[GoMusic] rules.json sem a lista \"rules\"; mod inativo");
+            GoMusic.LOGGER.error("[GoMusic] rules.json has no \"rules\" list; mod inactive");
             return empty();
         }
 
@@ -99,12 +99,12 @@ final class RuleSet {
                 rules.add(parsed);
             }
         }
-        GoMusic.LOGGER.info("[GoMusic] {} regras carregadas de {} no arquivo", rules.size(), json.rules.size());
+        GoMusic.LOGGER.info("[GoMusic] Loaded {} of {} rules from the file", rules.size(), json.rules.size());
         return new RuleSet(ticks(json.fadeSeconds), ticks(json.silenceSeconds), ticks(json.switchDelaySeconds), rules);
     }
 
     private static Rule parse(RuleJson json) {
-        String label = json.when == null || json.when.isEmpty() ? "(sempre)" : String.join(" + ", json.when);
+        String label = json.when == null || json.when.isEmpty() ? "(always)" : String.join(" + ", json.when);
 
         List<Predicate<Situation>> conditions = new ArrayList<>();
         try {
@@ -114,7 +114,7 @@ final class RuleSet {
                 }
             }
         } catch (IllegalArgumentException e) {
-            GoMusic.LOGGER.error("[GoMusic] Regra \"{}\" ignorada: {}", label, e.getMessage());
+            GoMusic.LOGGER.error("[GoMusic] Rule \"{}\" ignored: {}", label, e.getMessage());
             return null;
         }
 
@@ -124,12 +124,12 @@ final class RuleSet {
                 if (MusicFolder.trackExists(track)) {
                     tracks.add(track);
                 } else {
-                    GoMusic.LOGGER.warn("[GoMusic] Regra \"{}\": faixa não encontrada: {}.ogg", label, track);
+                    GoMusic.LOGGER.warn("[GoMusic] Rule \"{}\": track not found: {}.ogg", label, track);
                 }
             }
         }
         if (tracks.isEmpty()) {
-            GoMusic.LOGGER.error("[GoMusic] Regra \"{}\" ignorada: nenhuma faixa disponível", label);
+            GoMusic.LOGGER.error("[GoMusic] Rule \"{}\" ignored: no tracks available", label);
             return null;
         }
         return new Rule(label, conditions, tracks, json.interrupt, ticks(json.holdSeconds));
@@ -151,7 +151,7 @@ final class RuleSet {
         int equals = text.indexOf('=');
         if (equals < 0) {
             if (!Situation.FLAGS.contains(text)) {
-                throw new IllegalArgumentException("condição desconhecida: " + text);
+                throw new IllegalArgumentException("unknown condition: " + text);
             }
             return situation -> situation.flags.contains(text);
         }
@@ -171,11 +171,11 @@ final class RuleSet {
                 try {
                     minimum = Integer.parseInt(value);
                 } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("MOBS precisa de um número: " + text);
+                    throw new IllegalArgumentException("MOBS needs a number: " + text);
                 }
                 return situation -> situation.mobs >= minimum;
             default:
-                throw new IllegalArgumentException("condição desconhecida: " + text);
+                throw new IllegalArgumentException("unknown condition: " + text);
         }
     }
 

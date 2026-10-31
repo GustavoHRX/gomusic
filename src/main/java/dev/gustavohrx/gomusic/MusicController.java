@@ -12,7 +12,7 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Decide qual faixa toca: a primeira regra válida manda, e a troca acontece com fade.
+ * Decides which track plays: the first valid rule wins, and switches use a fade.
  */
 final class MusicController {
 
@@ -52,7 +52,7 @@ final class MusicController {
     void reload() {
         ruleSet = RuleSet.load();
         wantedRule = null;
-        // A regra antiga não existe mais; a faixa atual termina em fade e a nova lista assume.
+        // The old rule is gone: the current track fades out and the new list takes over.
         playingRule = null;
         if (playing != null) {
             playing.fadeOut();
@@ -66,12 +66,12 @@ final class MusicController {
         silenceLeft = 0;
     }
 
-    /** Saída de emergência para uma faixa presa: reinicia o sistema de som e recomeça do zero. */
+    /** Emergency exit for a stuck track: restarts the sound system and starts over. */
     void reset(Minecraft mc) {
         SoundManager sounds = mc.getSoundManager();
-        // Fica no log para investigar a causa do travamento depois.
-        GoMusic.LOGGER.warn("[GoMusic] Reset: faixa={} ativa={} saindo={} volume={} ticks={} regra={} desejada={}",
-                playing != null ? playing.track : "nenhuma",
+        // Logged so the cause of a stuck track can be investigated later.
+        GoMusic.LOGGER.warn("[GoMusic] Reset: track={} active={} fadingOut={} volume={} ticks={} rule={} wanted={}",
+                playing != null ? playing.track : "none",
                 playing != null && sounds.isActive(playing),
                 playing != null && playing.isFadingOut(),
                 playing != null ? playing.currentVolume() : 0f,
@@ -86,7 +86,7 @@ final class MusicController {
         activeRecords.clear();
         silenceLeft = 0;
         switchWait = 0;
-        // Relê as condições já no próximo tick, em vez de esperar até 1 s.
+        // Re-reads the conditions on the next tick instead of waiting up to 1 s.
         refreshCounter = REFRESH_TICKS;
     }
 
@@ -105,7 +105,7 @@ final class MusicController {
             situation.refresh(mc);
             if (!situation.flags.equals(lastLoggedFlags)) {
                 lastLoggedFlags = Set.copyOf(situation.flags);
-                GoMusic.LOGGER.debug("[GoMusic] Condições: {} | bioma: {} | tags: {} | dimensão: {} | mobs: {}",
+                GoMusic.LOGGER.debug("[GoMusic] Conditions: {} | biome: {} | tags: {} | dimension: {} | mobs: {}",
                         lastLoggedFlags, situation.biome, situation.biomeTags, situation.dimension, situation.mobs);
             }
             wantedRule = pickRule(refreshCounter);
@@ -123,7 +123,7 @@ final class MusicController {
 
     private RuleSet.Rule pickRule(int elapsedTicks) {
         RuleSet.Rule first = null;
-        // Todas atualizam, mesmo depois da primeira válida, para o holdSeconds contar certo.
+        // All rules update, even after the first valid one, so holdSeconds counts correctly.
         for (RuleSet.Rule rule : ruleSet.rules) {
             if (rule.update(situation, elapsedTicks) && first == null) {
                 first = rule;
@@ -154,7 +154,7 @@ final class MusicController {
             return;
         }
         if (wantedRule != null && wantedRule.tracks.contains(playing.track)) {
-            // A regra nova também usa esta faixa: troca a regra sem reiniciar a música.
+            // The new rule also uses this track: switch rules without restarting the music.
             playingRule = wantedRule;
             switchWait = 0;
             return;
@@ -169,7 +169,7 @@ final class MusicController {
     }
 
     private void startNextIfReady(SoundManager sounds) {
-        // Regra de maior prioridade não espera o silêncio entre faixas de quem tocava antes.
+        // A higher-priority rule does not wait out the silence left by the previous rule.
         if (wantedRule == null) {
             return;
         }
@@ -182,7 +182,7 @@ final class MusicController {
         playingRule = wantedRule;
         playingTicks = 0;
         sounds.play(playing);
-        GoMusic.LOGGER.info("[GoMusic] Tocando {} (regra: {})", track, wantedRule.label);
+        GoMusic.LOGGER.info("[GoMusic] Playing {} (rule: {})", track, wantedRule.label);
     }
 
     private String pickTrack(List<String> tracks) {
@@ -201,15 +201,15 @@ final class MusicController {
 
     List<String> describe() {
         List<String> lines = new ArrayList<>();
-        lines.add("[GoMusic] " + ruleSet.rules.size() + " regras"
-                + (hasRules() ? "" : " (inativo: falta gomusic/rules.json)"));
-        lines.add("Faixa: " + (playing != null ? playing.track : "nenhuma")
-                + (playing != null && playing.isFadingOut() ? " (saindo)" : "")
-                + " | regra atual: " + (playingRule != null ? playingRule.label : "-")
-                + " | regra desejada: " + (wantedRule != null ? wantedRule.label : "-"));
-        lines.add("Condições: " + situation.flags);
-        lines.add("Bioma: " + situation.biome + " | tags: " + situation.biomeTags);
-        lines.add("Dimensão: " + situation.dimension + " | mobs: " + situation.mobs);
+        lines.add("[GoMusic] " + ruleSet.rules.size() + " rules"
+                + (hasRules() ? "" : " (inactive: gomusic/rules.json is missing)"));
+        lines.add("Track: " + (playing != null ? playing.track : "none")
+                + (playing != null && playing.isFadingOut() ? " (fading out)" : "")
+                + " | current rule: " + (playingRule != null ? playingRule.label : "-")
+                + " | wanted rule: " + (wantedRule != null ? wantedRule.label : "-"));
+        lines.add("Conditions: " + situation.flags);
+        lines.add("Biome: " + situation.biome + " | tags: " + situation.biomeTags);
+        lines.add("Dimension: " + situation.dimension + " | mobs: " + situation.mobs);
         return lines;
     }
 }

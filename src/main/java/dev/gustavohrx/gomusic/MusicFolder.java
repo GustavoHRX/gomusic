@@ -14,8 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * A pasta "gomusic" do jogo: rules.json + um pacote de recursos sempre ativo com os .ogg.
- * O sistema de som do Minecraft só lê arquivos de pacotes, por isso a pasta é registrada como um.
+ * The game's "gomusic" folder: rules.json plus an always-active resource pack with the .ogg files.
+ * Minecraft's sound system only reads files from packs, so the folder is registered as one.
  */
 final class MusicFolder {
 
@@ -27,7 +27,7 @@ final class MusicFolder {
     private static final String PACK_MCMETA = """
             {
               "pack": {
-                "description": "GoMusic - faixas do modpack",
+                "description": "GoMusic tracks",
                 "pack_format": 15
               }
             }
@@ -35,18 +35,18 @@ final class MusicFolder {
 
     private static final String RULES_EXAMPLE = """
             {
-              // Copie este arquivo como rules.json para ativar o mod.
-              // A primeira regra válida vence. As faixas ficam em assets/gomusic/sounds, sem a extensão .ogg.
+              // Copy this file as rules.json to activate the mod.
+              // The first valid rule wins. Tracks go in assets/gomusic/sounds; list them without the .ogg extension.
               "fadeSeconds": 3,
               "silenceSeconds": 20,
               "switchDelaySeconds": 2,
               "rules": [
-                { "when": ["BOSS"], "tracks": ["chefe"], "holdSeconds": 5 },
-                { "when": ["MOBS=4"], "tracks": ["combate"], "holdSeconds": 15 },
+                { "when": ["BOSS"], "tracks": ["boss"], "holdSeconds": 5 },
+                { "when": ["MOBS=4"], "tracks": ["combat"], "holdSeconds": 15 },
                 { "when": ["DIM=nether"], "tracks": ["nether"] },
-                { "when": ["NIGHT", "RAIN||STORM"], "tracks": ["noite_chuva"] },
+                { "when": ["NIGHT", "RAIN||STORM"], "tracks": ["rainy_night"] },
                 { "when": ["MAIN_MENU"], "tracks": ["menu"] },
-                { "when": ["DAY", "!UNDERGROUND"], "tracks": ["dia_1", "dia_2"], "interrupt": false }
+                { "when": ["DAY", "!UNDERGROUND"], "tracks": ["day_1", "day_2"], "interrupt": false }
               ]
             }
             """;
@@ -60,7 +60,7 @@ final class MusicFolder {
             writeIfMissing(ROOT.resolve("pack.mcmeta"), PACK_MCMETA);
             writeIfMissing(ROOT.resolve("rules.example.json"), RULES_EXAMPLE);
         } catch (IOException e) {
-            GoMusic.LOGGER.error("[GoMusic] Não foi possível preparar a pasta {}", ROOT, e);
+            GoMusic.LOGGER.error("[GoMusic] Could not prepare the folder {}", ROOT, e);
         }
     }
 
@@ -90,7 +90,7 @@ final class MusicFolder {
             if (pack != null) {
                 consumer.accept(pack);
             } else {
-                GoMusic.LOGGER.error("[GoMusic] Pacote inválido em {}", ROOT);
+                GoMusic.LOGGER.error("[GoMusic] Invalid pack at {}", ROOT);
             }
         });
     }

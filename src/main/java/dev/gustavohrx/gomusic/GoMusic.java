@@ -13,7 +13,7 @@ public class GoMusic {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public GoMusic() {
-        // O mod só existe no cliente; em servidor dedicado não faz nada.
+        // Client-only mod: it does nothing on a dedicated server.
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientSetup.init();
         }

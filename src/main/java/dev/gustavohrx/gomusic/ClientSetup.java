@@ -50,7 +50,7 @@ final class ClientSetup {
         if (sound.getSource() == SoundSource.RECORDS) {
             controller.onRecordStarted(sound);
         } else if (sound.getSource() == SoundSource.MUSIC && controller.hasRules()) {
-            // Silencia a música do jogo; discos de vitrola usam RECORDS e continuam tocando.
+            // Mutes the game's music; jukebox records use RECORDS and keep playing.
             event.setSound(null);
         }
     }
@@ -77,14 +77,14 @@ final class ClientSetup {
     private static int reload(CommandContext<CommandSourceStack> context) {
         controller.reload();
         context.getSource().sendSystemMessage(Component.literal(
-                "[GoMusic] " + controller.ruleCount() + " regras carregadas."));
+                "[GoMusic] " + controller.ruleCount() + " rules loaded."));
         return 1;
     }
 
     private static int reset(CommandContext<CommandSourceStack> context) {
         controller.reset(Minecraft.getInstance());
         context.getSource().sendSystemMessage(Component.literal(
-                "[GoMusic] Sistema de som reiniciado. A música recomeça conforme a situação atual."));
+                "[GoMusic] Sound system restarted. Music will resume based on the current situation."));
         return 1;
     }
 
